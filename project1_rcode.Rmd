@@ -32,10 +32,11 @@ summary(y2)
 summary(y2orig)
 var(y2orig, na.rm = T)
 
-plot(density(y2[!is.na(y2)]), lwd = 2, col = "blue", main = "MAR", xlab = "Value of Y2", xlim = c(-5,15))
-lines(density(y2orig), lwd = 2, col = "green")
-legend(8, 0.225, legend = c("Observed Y2", "Complete Y2"),
-       col = c("blue", "green"), lty = c(1,1), lwd = c(2,2), bty = "n")
+plot(density(y2orig), lwd = 2, col = "dark green", main = "MNAR", xlab = "Value of Y2", xlim = c(-5,15),
+     ylim = c(0,0.3))
+lines(density(y2[!is.na(y2)]), lwd = 2, col = "blue")
+legend(8, 0.3, legend = c("Complete Y2", "Observed Y2"),
+       col = c("dark green", "blue"), lty = c(1,1), lwd = c(2,2), bty = "n")
 ```
 
 ```{r Task 3 Problem 2}
@@ -44,11 +45,11 @@ sigmaest <- sigma(fit)
 pred <- fit$coefficients[1] + y1 * fit$coefficients[2] + rnorm(n, 0, sigmaest)
 y2_completed <- ifelse(is.na(y2), pred, y2)
 
-plot(density(y2_completed), lwd = 2, col = "blue", main = "Marginal Distributions",
-     xlab = "Value of Y2", xlim = c(-5,15), ylim = c(0,0.2))
-lines(density(y2orig), lwd = 2, col = "green")
-legend(8.5, 0.2, legend = c("Y2 W/ Imputation", "Complete Y2"),
-       col = c("blue", "green"), lty = c(1,1), lwd = c(2,2), bty = "n")
+plot(density(y2orig), lwd = 2, col = "dark green", main = "MNAR with Imputation",
+     xlab = "Value of Y2", xlim = c(-5,15), ylim = c(0,0.3))
+lines(density(y2_completed), lwd = 2, col = "blue")
+legend(8, 0.3, legend = c("Complete Y2", "Y2 w/ Imputation"),
+       col = c("dark green", "blue"), lty = c(1,1), lwd = c(2,2), bty = "n")
 ```
 
 ```{r Task 3 Problem 3}
@@ -74,11 +75,11 @@ summary(y2)
 summary(y2orig)
 var(y2orig, na.rm = T)
 
-plot(density(y2[!is.na(y2)]), lwd = 2, col = "blue" ,xlim = c(-5,15), main = "Marginal Distributions",
-     xlab = "Value of Y2")
-lines(density(y2orig), lwd = 2, col = "green")
-legend(8.5, 0.3, legend = c("Observed", "Complete Y2"),
-       col = c("blue", "green"), lty = c(1,1), lwd = c(2,2), bty = "n")
+plot(density(y2orig), lwd = 2, col = "dark green" ,xlim = c(-5,15), ylim = c(0,0.3),
+     main = "Marginal distributions for complete and MNAR", xlab = "Value of Y2")
+lines(density(y2[!is.na(y2)]), lwd = 2, col = "blue")
+legend(8, 0.3, legend = c("Complete Y2", "Observed"),
+       col = c("dark green", "blue"), lty = c(1,1), lwd = c(2,2), bty = "n")
 ```
 
 ```{r Task 3 Problem 4}
@@ -87,25 +88,38 @@ sigmaest <- sigma(fit)
 pred <- fit$coefficients[1] + y1 * fit$coefficients[2] + rnorm(n, 0, sigmaest)
 y2_completed <- ifelse(is.na(y2), pred, y2)
 
-plot(density(y2_completed), lwd = 2, col = "blue", xlim = c(-5,15), main = "Marginal Distributions",
-     xlab = "Value of Y2")
-lines(density(y2orig), lwd = 2, col = "green")
-legend(8.5, 0.275, legend = c("Y2 W/ Imputation", "Complete Y2"),
-       col = c("blue", "green"), lty = c(1,1), lwd = c(2,2), bty = "n")
+plot(density(y2orig), lwd = 2, col = "dark green", xlim = c(-5,15), ylim = c(0,0.3),
+     main = "Marginal distributions for complete and observed w/ imputations", xlab = "Value of Y2")
+lines(density(y2_completed), lwd = 2, col = "blue")
+legend(8, 0.3, legend = c("Complete Y2", "Y2 w/ Imputation"),
+       col = c("dark green", "blue"), lty = c(1,1), lwd = c(2,2), bty = "n")
 
 ```
 
 ```{r Task4 Problem 1}
-load("C:/Users/fergu/Documents/Masters/Incomplete Data Analysis/databp.Rdata")
+library(kableExtra)
+library(tidyr)
+load("databp.Rdata")
 
 databp_complete <- databp[complete.cases(databp),]
 
-mean(databp_complete$recovtime)
+df <- data.frame("Mean recov time" = 0,
+           "Cor w Dose" = 0,
+           "Cor w b-pressure" = 0)
+
+df[1] <- mean(databp_complete$recovtime)
 
 # Is Pearsons by default
-cor(databp_complete$recovtime, databp_complete$logdose)
+df[2] <- cor(databp_complete$recovtime, databp_complete$logdose)
 
-cor(databp_complete$recovtime, databp_complete$bloodp)
+df[3] <- cor(databp_complete$recovtime, databp_complete$bloodp)
+
+
+df_kab <- df %>%
+  kable(caption = "Mean and Correlations for Complete Case") %>%
+  kable_classic_2(full_width = F)
+
+df_kab
 ```
 
 
@@ -113,13 +127,23 @@ cor(databp_complete$recovtime, databp_complete$bloodp)
 databp_mean_imput <- databp
 databp_mean_imput$recovtime[is.na(databp_mean_imput$recovtime)] <- mean(databp_mean_imput$recovtime, na.rm = T)
 
+df <- data.frame("Mean recov time" = 0,
+           "Cor w Dose" = 0,
+           "Cor w b-pressure" = 0)
+
 # Mean stays the same of course
-mean(databp_mean_imput$recovtime)
+df[1] <- mean(databp_mean_imput$recovtime)
 
 # Is Pearsons by default
-cor(databp_mean_imput$recovtime, databp_mean_imput$logdose)
+df[2] <- cor(databp_mean_imput$recovtime, databp_mean_imput$logdose)
 
-cor(databp_mean_imput$recovtime, databp_mean_imput$bloodp)
+df[3] <- cor(databp_mean_imput$recovtime, databp_mean_imput$bloodp)
+
+df_kab <- df %>%
+  kable(caption = "Mean and Correlations with imputed mean") %>%
+  kable_classic_2(full_width = F)
+
+df_kab
 ```
 
 ```{r Task4 Problem 3}
@@ -131,13 +155,17 @@ pred <- fit$coefficients[1] + databp_reg_imput$logdose * fit$coefficients[2] + d
 
 databp_reg_imput$recovtime <- ifelse(is.na(databp_reg_imput$recovtime), pred, databp_reg_imput$recovtime)
 
-# Mean stays the same of course
-mean(databp_reg_imput$recovtime)
+df[1] <- mean(databp_reg_imput$recovtime)
 
-# Is Pearsons by default
-cor(databp_reg_imput$recovtime, databp_reg_imput$logdose)
+df[2] <- cor(databp_reg_imput$recovtime, databp_reg_imput$logdose)
 
-cor(databp_reg_imput$recovtime, databp_reg_imput$bloodp)
+df[3] <- cor(databp_reg_imput$recovtime, databp_reg_imput$bloodp)
+
+df_kab <- df %>%
+  kable(caption = "Mean and Correlations with regression imputation") %>%
+  kable_classic_2(full_width = F)
+
+df_kab
 ```
 
 
@@ -155,14 +183,22 @@ databp_stochreg_imput$recovtime <- ifelse(is.na(databp_stochreg_imput$recovtime)
 
 databp_stochreg_imput$recovtime <- ifelse(databp_stochreg_imput$recovtime <0, 0, databp_stochreg_imput$recovtime)
 
-# Mean stays the same of course
-mean(databp_stochreg_imput$recovtime)
+df[1] <- mean(databp_stochreg_imput$recovtime)
 
-var(databp_stochreg_imput$recovtime)
-# Is Pearsons by default
-cor(databp_stochreg_imput$recovtime, databp_stochreg_imput$logdose)
+df[2] <- cor(databp_stochreg_imput$recovtime, databp_stochreg_imput$logdose)
 
-cor(databp_stochreg_imput$recovtime, databp_stochreg_imput$bloodp)
+df[3] <- cor(databp_stochreg_imput$recovtime, databp_stochreg_imput$bloodp)
+
+df_kab <- df %>%
+  kable(caption = "Mean and Correlations with stochastic regression imputation") %>%
+  kable_classic_2(full_width = F)
+
+df_kab
+
+Df_Var <- data.frame("Stochastic Regression Variance" = NA,
+           "Predictive Mean Match" = NA)
+
+Df_Var[1] <- var(databp_stochreg_imput$recovtime)
 ```
 
 ```{r Task4 Problem 5}
@@ -197,18 +233,24 @@ for (i in 1:length(pred)){
 #print(databp_meanmatch)
 
 # Mean stays the same of course
-df <- data.frame(Mean = mean(databp_meanmatch$recovtime),
-                 Cor_Dose = cor(databp_meanmatch$recovtime, databp_meanmatch$logdose),
-                 Cor_Bloods = cor(databp_meanmatch$recovtime, databp_meanmatch$bloodp))
+df[1] <- mean(databp_meanmatch$recovtime)
 
-mean(databp_meanmatch$recovtime)
+df[2] <- cor(databp_meanmatch$recovtime, databp_meanmatch$logdose)
 
-# Is Pearsons by default
-cor(databp_meanmatch$recovtime, databp_meanmatch$logdose)
+df[3] <- cor(databp_meanmatch$recovtime, databp_meanmatch$bloodp)
 
-cor(databp_meanmatch$recovtime, databp_meanmatch$bloodp)
+df_kab <- df %>%
+  kable(caption = "Mean and Correlations with predictive mean matching imputation") %>%
+  kable_classic_2(full_width = F)
 
-# var(databp_meanmatch$recovtime)
+df_kab
+
+
+Df_Var[2] <- var(databp_meanmatch$recovtime)
+
+# Standard Errors
+Df_Var/sqrt(25)
+
 
 # The obvious advantage of this method is that it is less likely to return implausible values. 
 # Disadvantage would be that it has reduced variance.
